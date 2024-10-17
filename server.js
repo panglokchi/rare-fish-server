@@ -3,6 +3,9 @@ require('dotenv').config()
 const express = require("express");
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
+const https = require("https");
+const fs = require("fs");
+const path = require("path");
 
 const db = require('./database').connection;
 const User = require('./models').User;
@@ -30,8 +33,15 @@ require('./routes/missions')(app);
 
 require('./tasks.js');
 
+const options = {
+  key: fs.readFileSync(path.join("server-key.pem")),
+  cert: fs.readFileSync(path.join("server.pem")),
+};
+
+const server = https.createServer(options, app);
+
 // set port, listen for requests
 const PORT = process.env.PORT;
-app.listen(PORT, ["localhost", "172.26.87.217", process.env.BACKEND], () => {
+server.listen(PORT, ["localhost", "172.26.87.217", process.env.BACKEND], () => {
   console.log(`Server is running on port ${PORT}.`);
 });
