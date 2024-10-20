@@ -122,15 +122,17 @@ module.exports = async function(app){
                 return res.status(404).json({ error: 'Email not found' });
             }
 
+            const token = nanoid.nanoid(32);
+
             const newResetToken = new ResetPasswordToken({
                 user: user._id,
-                key: nanoid.nanoid(32)
+                key: token
             })
 
             await newResetToken.save()
 
             utils.sendPasswordResetEmail(req.body.email, token)
-<
+
             res.status(200).json({ message: 'Password reset requested.'});
         } catch (error) {
             res.status(500).json({ error: 'Internal server error' });
