@@ -30,6 +30,23 @@ const Admin = User.discriminator('Admin', new mongoose.Schema(
     { }/*, userOptions*/
 ));
 
+const tokenSchema = new mongoose.Schema({
+    user: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    key: { type: String, required: true},
+    expiry: { type: Date, default: Date.now }
+})
+
+const Token = mongoose.model('Token', tokenSchema)
+
+const VerificationToken = Token.discriminator('VerificationToken', new mongoose.Schema(
+    { }/*, userOptions*/
+));
+
+const ResetPasswordToken = Token.discriminator('ResetPasswordToken', new mongoose.Schema(
+    { }/*, userOptions*/
+));
+
+/*
 const verificationTokenSchema = new mongoose.Schema({
     user: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     key: { type: String, required: true},
@@ -37,6 +54,7 @@ const verificationTokenSchema = new mongoose.Schema({
 })
 
 const VerificationToken = mongoose.model('VerificationToken', verificationTokenSchema)
+*/
 
 const playerSchema = new mongoose.Schema({
     user: { type: Schema.Types.ObjectId, ref: 'User', required: true },
@@ -272,6 +290,7 @@ module.exports = {
     User,
     Admin,
     VerificationToken,
+    ResetPasswordToken,
     Player,
     FishType,
     Fish,

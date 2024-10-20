@@ -9,6 +9,7 @@ const Player = require('../models.js').Player;
 const FishType = require('../models.js').FishType;
 const Fish = require('../models.js').Fish;
 const VerificationToken = require('../models.js').VerificationToken;
+const ResetPasswordToken = require('../models.js').ResetPasswordToken;
 const verifyUser = require('../auth.js').verifyUser
 const utils = require('../utils');
 const { access } = require("fs");
@@ -114,6 +115,80 @@ module.exports = async function(app){
         }
     });
     
+    app.post('/api/forgot-password', async (req, res) => {
+        try {
+            const user = await User.findOne({ email: req.body.email });
+            if (!user) {
+                return res.status(404).json({ error: 'Email not found' });
+            }
+
+            const newResetToken = new ResetPasswordToken({
+                user: user._id,
+                key: nanoid.nanoid(32)
+            })
+
+            await newResetToken.save()
+
+            utils.sendPasswordResetEmail(req.body.email, token)
+<
+            res.status(200).json({ message: 'Password reset requested.'});
+        } catch (error) {
+            res.status(500).json({ error: 'Internal server error' });
+        }
+    });
+
+    app.get('/api/reset-password/:token', async (req, res) => {
+        try {
+            const token = await ResetPasswordToken.findOne({
+                key: req.params.token
+            }).populate("user")
+
+            if (!token) {
+                return res.status(404).json({ error: 'Invalid token' })
+            }
+
+            if (Date.parse(token.expiry) + 30*60*1000 < Date.now()) {
+                return res.status(403).json({ error: 'Token expired'}) // OK
+            }
+
+            res.status(200).json({ message: 'Valid token' });
+        } catch (error) {
+            res.status(500).json({ error: 'Internal server error' });
+        }
+    });
+
+    app.post('/api/reset-password/:token', async (req, res) => {
+        try {
+            const token = await ResetPasswordToken.findOne({
+                key: req.params.token
+            }).populate("user")
+
+            if (!token) {
+                return res.status(404).json({ error: 'Invalid token' })
+            }
+
+            if (Date.parse(token.expiry) + 30*60*1000 < Date.now()) {
+                return res.status(403).json({ error: 'Token expired'}) // OK
+            }
+
+            // Hash the password
+            const hashedPassword = await bcrypt.hash(req.body.password, 10);
+        
+            token.user.password = hashedPassword
+            await token.user.save();
+
+            // Generate JWT token
+            const accessToken = jwt.sign({ email: token.user.email }, process.env.SECRET);
+
+            await ResetPasswordToken.deleteOne({
+                _id: token._id
+            })
+
+            res.status(200).json({ message: 'Password reset', token: accessToken });
+        } catch (error) {
+            res.status(500).json({ error: 'Internal server error' });
+        }
+    });
 
     // Route to authenticate and log in a user
     app.post('/api/login', async (req, res) => {
