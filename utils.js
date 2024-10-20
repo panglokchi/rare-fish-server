@@ -11,6 +11,11 @@ const Mission = require('./models.js').Mission
 const verifyUser = require('./auth.js').verifyUser
 const defines = require('./defines.js')
 
+const formData = require('form-data');
+const Mailgun = require('mailgun.js');
+const mailgun = new Mailgun(formData);
+const mg = mailgun.client({username: 'api', key: process.env.MAILGUN_API_KEY});
+
 const updateDailies = async (playerID = null) => {
 
     if (playerID == null) {
@@ -118,7 +123,33 @@ const progressMissions = async (playerID, objectiveUpdates) => {
     }
 }
 
+const sendVerificationEmail = async (target, token) => {
+    mg.messages.create('mail.fishinvestor.com', {
+        from: "Rare Fish Investor Simulator <verify@mail.fishinvestor.com>",
+        to: [target],
+        subject: "Verify your Account",
+        text: "Use this link to verify your account",
+        html: `Thanks for signing up. <br/><br/> Use the link below to verify your account. <br/> <a href="https://fishinvestor.com/verify/${token}">https://fishinvestor.com/verify/${token}</a> <br/><br/> This link expires in 30 minutes.`
+    })
+    .then(msg => {}) // logs response data
+    .catch(err => console.log(err)); // logs any error
+}
+
+const sendPasswordResetEmail = async (target, token) => {
+    mg.messages.create('mail.fishinvestor.com', {
+        from: "Rare Fish Investor Simulator <verify@mail.fishinvestor.com>",
+        to: [target],
+        subject: "Reset your Password",
+        text: "Use this link to reset your password",
+        html: `You have requested a password reset. <br/><br/> Use the link below to reset your password. <br/> <a href="https://fishinvestor.com/reset-password/${token}">https://fishinvestor.com/reset-password/${token}</a> <br/><br/> This link expires in 30 minutes.`
+    })
+    .then(msg => {}) // logs response data
+    .catch(err => console.log(err)); // logs any error
+}
+
 module.exports = {
     updateDailies,
     progressMissions,
+    sendVerificationEmail,
+    sendPasswordResetEmail
 }

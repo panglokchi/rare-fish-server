@@ -12,6 +12,7 @@ const DropWeight = require('../models').DropWeight;
 const TempDropWeight = require('../models').TempDropWeight;
 const Mission = require('../models').Mission;
 const verifyAdmin = require('../auth.js').verifyAdmin
+const utils = require('../utils.js')
 
 module.exports = function(app){
 
@@ -140,6 +141,15 @@ module.exports = function(app){
             //console.log(newFish)
             await newMission.save();
             res.status(200).json(newMission);
+        } catch (error) {
+            res.status(500).json({ error: 'Internal server error' });
+        }
+    });
+
+    app.post('/api/admin/send-email', async function(req, res){
+        try {
+            utils.sendVerificationEmail(req.body.email, req.body.token)
+            res.status(200).json();
         } catch (error) {
             res.status(500).json({ error: 'Internal server error' });
         }

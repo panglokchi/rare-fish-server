@@ -42,6 +42,6 @@ const server = https.createServer(options, app);
 
 // set port, listen for requests
 const PORT = process.env.PORT;
-server.listen(PORT, ["localhost", "172.26.87.217", process.env.BACKEND], () => {
+app.listen(PORT, ["localhost", "172.26.87.217", process.env.BACKEND], () => {
   console.log(`Server is running on port ${PORT}.`);
 });

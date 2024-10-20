@@ -30,6 +30,14 @@ const Admin = User.discriminator('Admin', new mongoose.Schema(
     { }/*, userOptions*/
 ));
 
+const verificationTokenSchema = new mongoose.Schema({
+    user: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    key: { type: String, required: true},
+    expiry: { type: Date, default: Date.now }
+})
+
+const VerificationToken = mongoose.model('VerificationToken', verificationTokenSchema)
+
 const playerSchema = new mongoose.Schema({
     user: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     exp: { type: Number, default: 0, min: 0 },
@@ -127,6 +135,14 @@ fishSchema.virtual('popularity').get(function() {
 })
 
 const Fish = mongoose.model('Fish', fishSchema);
+
+const newFishSchema = new mongoose.Schema({
+    player: { type: Schema.Types.ObjectId, ref: 'Player', required: true },
+    fish: { type: mongoose.Schema.Types.ObjectId, ref: 'Fish', required: true }
+});
+
+const newFish = mongoose.model('newFish', newFishSchema);
+
 
 const worldSchema = new mongoose.Schema({
     name: { type: String, required: true },
@@ -255,9 +271,11 @@ const Mission = mongoose.model('Mission', missionSchema)
 module.exports = {
     User,
     Admin,
+    VerificationToken,
     Player,
     FishType,
     Fish,
+    newFish,
     World,
     DropWeight,
     TempDropWeight,
