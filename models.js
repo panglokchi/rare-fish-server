@@ -30,6 +30,10 @@ const Admin = User.discriminator('Admin', new mongoose.Schema(
     { }/*, userOptions*/
 ));
 
+const Guest = User.discriminator('Guest', new mongoose.Schema(
+    { }/*, userOptions*/
+));
+
 const tokenSchema = new mongoose.Schema({
     user: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     key: { type: String, required: true},
@@ -45,6 +49,11 @@ const VerificationToken = Token.discriminator('VerificationToken', new mongoose.
 const ResetPasswordToken = Token.discriminator('ResetPasswordToken', new mongoose.Schema(
     { }/*, userOptions*/
 ));
+
+const RegisterGuestToken = Token.discriminator('RegisterGuestToken', new mongoose.Schema({ 
+    dummy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    // dummy user to hold the username and email 
+}/*, userOptions*/));
 
 /*
 const verificationTokenSchema = new mongoose.Schema({
@@ -289,8 +298,10 @@ const Mission = mongoose.model('Mission', missionSchema)
 module.exports = {
     User,
     Admin,
+    Guest,
     VerificationToken,
     ResetPasswordToken,
+    RegisterGuestToken,
     Player,
     FishType,
     Fish,

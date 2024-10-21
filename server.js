@@ -15,7 +15,7 @@ app.use(express.json()); // required for parsing json bodies
 
 const cors = require("cors");
 const corsOptions = {
-	origin: ["http://172.26.87.217:4000", "http://localhost:4000", process.env.FRONTEND]
+	origin: ["http://172.26.87.217:4000", "http://localhost:4000", "https://fishinvestor.com", "http:/fishinvestor.com", process.env.FRONTEND]
 };
 app.use(cors(corsOptions));
 
@@ -42,6 +42,6 @@ const server = https.createServer(options, app);
 
 // set port, listen for requests
 const PORT = process.env.PORT;
-app.listen(PORT, ["localhost", "172.26.87.217", process.env.BACKEND], () => {
+server.listen(PORT, ["localhost", "172.26.87.217", process.env.BACKEND], () => {
   console.log(`Server is running on port ${PORT}.`);
 });

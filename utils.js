@@ -129,7 +129,7 @@ const sendVerificationEmail = async (target, token) => {
         to: [target],
         subject: "Verify your Account",
         text: "Use this link to verify your account",
-        html: `Thanks for signing up. <br/><br/> Use the link below to verify your account. <br/> <a href="https://fishinvestor.com/verify/${token}">https://fishinvestor.com/verify/${token}</a> <br/><br/> This link expires in 30 minutes.`
+        html: `Thank you for signing up. <br/><br/> Use the link below to verify your account. <br/> <a href="https://fishinvestor.com/verify/${token}">https://fishinvestor.com/verify/${token}</a> <br/><br/> This link expires in 30 minutes.`
     })
     .then(msg => {}) // logs response data
     .catch(err => console.log(err)); // logs any error
@@ -137,11 +137,23 @@ const sendVerificationEmail = async (target, token) => {
 
 const sendPasswordResetEmail = async (target, token) => {
     mg.messages.create('mail.fishinvestor.com', {
-        from: "Rare Fish Investor Simulator <verify@mail.fishinvestor.com>",
+        from: "Rare Fish Investor Simulator <password-reset@mail.fishinvestor.com>",
         to: [target],
         subject: "Reset your Password",
         text: "Use this link to reset your password",
         html: `You have requested a password reset. <br/><br/> Use the link below to reset your password. <br/> <a href="https://fishinvestor.com/reset-password/${token}">https://fishinvestor.com/reset-password/${token}</a> <br/><br/> This link expires in 30 minutes.`
+    })
+    .then(msg => {}) // logs response data
+    .catch(err => console.log(err)); // logs any error
+}
+
+const sendRegisterGuestEmail = async (target, token) => {
+    mg.messages.create('mail.fishinvestor.com', {
+        from: "Rare Fish Investor Simulator <verify@mail.fishinvestor.com>",
+        to: [target],
+        subject: "Verify your Email",
+        text: "Use this link to verify your email",
+        html: `Thank you for your registering. <br/><br/> Use the link below to verify your email. <br/> <a href="https://fishinvestor.com/register-guest/${token}">https://fishinvestor.com/register-guest/${token}</a> <br/><br/> This link expires in 30 minutes.`
     })
     .then(msg => {}) // logs response data
     .catch(err => console.log(err)); // logs any error
