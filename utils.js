@@ -163,5 +163,6 @@ module.exports = {
     updateDailies,
     progressMissions,
     sendVerificationEmail,
-    sendPasswordResetEmail
+    sendPasswordResetEmail,
+    sendRegisterGuestEmail
 }
