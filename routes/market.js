@@ -18,6 +18,63 @@ const verifyUser = require('../auth.js').verifyUser
 
 module.exports = function(app){
 
+    app.get('/api/market/top-auctions', async (req, res) => {
+        try {
+            const topAuctions = await Auction.find()
+                .sort({ highestBid: -1 }) // Sort by highestBid in descending order
+                .limit(Math.min(req.query.num || 5, 5)) // Limit to 5 results
+                .populate('seller', 'highestBidder').populate({
+                    path: "seller",
+                    populate: {
+                        path: "user",
+                        select: "username"
+                    }
+                }).populate('seller').populate({
+                    path: "highestBidder",
+                    populate: {
+                        path: "user",
+                        select: "username"
+                    }
+                }) // Populate seller details (adjust field as necessary)
+                .populate('fish'); // Populate fish details (adjust field as necessary)
+    
+            res.status(200).json(topAuctions);
+        } catch (error) {
+            res.status(500).json({ message: 'Internal server error' });
+        }
+    });
+
+    app.get('/api/market/recent-auctions', async (req, res) => {
+        try {
+            const now = new Date(); // Get the current date and time
+
+            const finishedAuction = await Auction.find({
+                expiry: { $lt: now }, // Filter for auctions that have expired
+                highestBid: { $ne: null } // Ensure highestBid is not null
+            })
+            .sort({ expiry: -1 }) // Sort by highestBid in descending order
+            .limit(Math.min(req.query.num || 5, 5)) // Limit to 5 results
+            .populate('seller', 'highestBidder').populate({
+                path: "seller",
+                populate: {
+                    path: "user",
+                    select: "username"
+                }
+            }).populate('seller').populate({
+                path: "highestBidder",
+                populate: {
+                    path: "user",
+                    select: "username"
+                }
+            }) // Populate seller details (adjust field as necessary)
+            .populate('fish'); // Populate fish details (adjust field as necessary)
+    
+            res.status(200).json(finishedAuction);
+        } catch (error) {
+            res.status(500).json({ message: 'Internal server error' });
+        }
+    });
+
     app.use('/api/market/', verifyUser)
     app.use('/api/market', async (req, res, next) => {
         const player = await Player.findOne({user: new mongoose.Types.ObjectId(req.user._id)});
