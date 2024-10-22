@@ -116,7 +116,8 @@ const fishSchema = new mongoose.Schema({
     exp: { type: Number, default: 0, min: 0 },
     level: { type: Number, default: 1, min: 1 },
     nickname: { type: String, default: null },
-    history: { type: Array, default: [] } // to do 
+    history: { type: Array, default: [] }, // to do 
+    isNewFish: { type: Boolean, default: false }
 }, { toJSON: {virtuals: true}, toObject: {virtuals: true} });
 
 fishSchema.virtual('lastLevelExp').get(function() {

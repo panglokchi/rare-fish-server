@@ -11,6 +11,8 @@ const DropWeight = require('../models.js').DropWeight;
 const FishType = require('../models.js').FishType;
 const Fish = require('../models.js').Fish;
 const Mission = require('../models.js').Mission;
+const Auction = require('../models.js').Auction;
+const AuctionBid = require('../models.js').AuctionBid;
 const verifyUser = require('../auth.js').verifyUser
 const expRequired = require('../defines.js').expRequired
 const utils = require('../utils.js')
@@ -108,7 +110,8 @@ module.exports = function(app){
                             history: [{
                                 "event": "created",
                                 "time": Date.now()
-                            }]
+                            }],
+                            isNewFish: true
                         })
                         await newFish.save()
                         newFishes.push(newFish)
@@ -148,6 +151,70 @@ module.exports = function(app){
             res.status(500).json({ error: 'Internal server error' });
         }
     }); // move to missions.js
+
+    app.get('/api/player/notifications', async function(req, res){
+        try {
+            // Find missions for the player
+            const missions = await Mission.find({ player: req.player._id });
+    
+            // Count completed missions
+            const completedMissionsCount = missions.filter(mission => mission.complete).length;
+
+            const newFishCount = await Fish.countDocuments({ owner: req.player._id, isNewFish: true })
+
+            const now = new Date();
+            const finishedAuctionsCount = await Auction.countDocuments({
+                $or: [
+                    {
+                        seller: req.player._id,
+                        expiry: { $lt: now }, // Auction is expired
+                        'claimed.seller': false // Seller has not claimed
+                    },
+                    {
+                        highestBidder: req.player._id,
+                        expiry: { $lt: now }, // Auction is expired
+                        'claimed.buyer': false // Buyer has not claimed
+                    }
+                ]
+            });
+
+            const losingAuctions = await Auction.find({
+                expiry: { $gt: now }, // Auctions that have not yet expired
+                highestBidder: { $ne: req.player._id } // Player is not the highest bidder
+            }).where('_id').in(
+                await AuctionBid.find({ bidder: req.player._id }).distinct('auction') // Bids made by the player
+            );
+    
+            const losingAuctionCount = losingAuctions.length;
+    
+            return res.status(200).json({
+                missions: completedMissionsCount,
+                newFish: newFishCount,
+                finishedAuctions: finishedAuctionsCount,
+                losingAuctions: losingAuctionCount
+            });
+        } catch (error) {
+            console.error(error);
+            return res.status(500).json({ message: 'Internal server error' });
+        }
+    })
+
+    app.post('/api/player/reset-new-fish', async function(req, res){
+        try {
+
+            await Fish.updateMany(
+                { owner: req.player._id, isNewFish: true },
+                { $unset: { isNewFish: false } }
+            );
+
+            return res.status(200).json({
+
+            });
+        } catch (error) {
+            console.error(error);
+            return res.status(500).json({ message: 'Internal server error' });
+        }
+    })
 
     app.get('/api/player/:playerID/fishes', async function(req, res){
         try {

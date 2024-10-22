@@ -22,7 +22,7 @@ module.exports = function(app){
         try {
             const topAuctions = await Auction.find()
                 .sort({ highestBid: -1 }) // Sort by highestBid in descending order
-                .limit(Math.min(req.query.num || 5, 5)) // Limit to 5 results
+                .limit(Math.min(req.query.num || 5, 10)) // Limit to 5 results
                 .populate('seller', 'highestBidder').populate({
                     path: "seller",
                     populate: {
@@ -53,7 +53,7 @@ module.exports = function(app){
                 highestBid: { $ne: null } // Ensure highestBid is not null
             })
             .sort({ expiry: -1 }) // Sort by highestBid in descending order
-            .limit(Math.min(req.query.num || 5, 5)) // Limit to 5 results
+            .limit(Math.min(req.query.num || 5, 10)) // Limit to 5 results
             .populate('seller', 'highestBidder').populate({
                 path: "seller",
                 populate: {
@@ -108,6 +108,7 @@ module.exports = function(app){
                     return res.status(403).json({error: 'There is already an auction for this fish'})
             }
             fish.owner = null;
+            fish.isNewFish = false;
             await fish.save()
             const newAuction = new Auction({
                 seller: req.player._id,
@@ -380,6 +381,7 @@ module.exports = function(app){
                 auction.claimed.buyer = true;
                 await auction.save();
                 auction.fish.owner = new mongoose.Types.ObjectId(req.player._id)
+                auction.fish.isNewFish = true;
                 await auction.fish.save();
                 return res.status(200).json({ error: 'Auction unsold - claimed'}); // OK
             }
@@ -408,6 +410,7 @@ module.exports = function(app){
                 //console.log("case 3")
                 auction.claimed.buyer = true;
                 auction.fish.owner = new mongoose.Types.ObjectId(req.player._id)
+                auction.fish.isNewFish = true;
                 await auction.save();
                 await auction.fish.save();
                 return res.status(200).json({ error: 'Auction sold - buyer claimed'}); // OK
