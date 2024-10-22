@@ -117,7 +117,8 @@ module.exports = function(app){
                 //...(req.body.start) && {start: req.body.start},
                 //...(req.body.expiry) && {expiry: req.body.expiry},
                 //start: Date.now() + 1000,
-                ...(req.body.duration) && {expiry: Date.now() + req.body.duration}
+                //...(req.body.duration) && {expiry: Date.now() + req.body.duration}
+                expiry: Date.now() + 60 * 1000
             });
             // minimum auction time !!?? 
             //console.log(newFish)
@@ -474,6 +475,10 @@ module.exports = function(app){
 
             if (auction.minimumPrice > req.body.bid) {
                 return res.status(403).json({ error: 'Below minimum bid'})
+            }
+
+            if (req.body.bid > req.player.money) {
+                return res.status(403).json({ error: 'Not enough money'})
             }
 
             const newAuctionBid = new AuctionBid({
