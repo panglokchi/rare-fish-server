@@ -118,7 +118,7 @@ module.exports = function(app){
                 //...(req.body.expiry) && {expiry: req.body.expiry},
                 //start: Date.now() + 1000,
                 //...(req.body.duration) && {expiry: Date.now() + req.body.duration}
-                expiry: Date.now() + 60 * 1000
+                expiry: Date.now() + 60*1000
             });
             // minimum auction time !!?? 
             //console.log(newFish)
@@ -493,6 +493,12 @@ module.exports = function(app){
                 auction.highestBidder.save()
             }
 
+            let message = "Bid Successful"
+            if(Date.parse(auction.expiry) - Date.now() < 30*60*1000) {
+                auction.expiry = Date.now() + 30*60*1000
+                message = "Auction extended"
+            }
+
             req.player.money -= req.body.bid
             req.player.save()
             auction.highestBidder = req.player._id
@@ -500,7 +506,7 @@ module.exports = function(app){
             await auction.save()
             await newAuctionBid.save()
 
-            res.status(200).json(newAuctionBid);
+            res.status(200).json({message});
         } catch (error) {
             res.status(500).json({ error: 'Internal server error' });
         }
