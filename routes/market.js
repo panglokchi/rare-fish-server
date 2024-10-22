@@ -118,7 +118,7 @@ module.exports = function(app){
                 //...(req.body.expiry) && {expiry: req.body.expiry},
                 //start: Date.now() + 1000,
                 //...(req.body.duration) && {expiry: Date.now() + req.body.duration}
-                expiry: Date.now() + 60*1000
+                expiry: Date.now() + 12*60*60*1000
             });
             // minimum auction time !!?? 
             //console.log(newFish)
