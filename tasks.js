@@ -81,4 +81,20 @@ const updateMissions = new CronJob(
 	'utc' // timeZone
 );
 
+const generateAuctions = new CronJob(
+	'0 */12 * * *', // cronTime
+	async function () {
+
+        try {
+
+            //console.log('Aquarium money updated for all players.');
+        } catch (error) {
+            
+        }
+	}, // onTick
+	null, // onComplete
+	true, // start
+	'utc' // timeZone
+);
+
 module.exports = {}

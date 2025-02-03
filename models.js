@@ -249,7 +249,7 @@ const auctionBidSchema = new mongoose.Schema({
     bidder: { type: mongoose.Schema.Types.ObjectId, ref: 'Player', required: true },
     auction: { type: mongoose.Schema.Types.ObjectId, ref: 'Auction', required: true },
     bid: { type: Number, required: true, min: 1 },
-    time: { type: Date, required: true, min: Date.now },
+    time: { type: Date, required: true},
 })
 
 const AuctionBid = mongoose.model('AuctionBid', auctionBidSchema)

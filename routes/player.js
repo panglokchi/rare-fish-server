@@ -40,6 +40,22 @@ module.exports = function(app){
 
     app.post('/api/player/go-fishing', async function(req, res){
         try {
+
+            /*
+            console.log(
+                await DropWeight.aggregate([
+                    { $match: { world: req.body.world } },
+                    { $group: { _id: { 
+                        fishType: "$fishType",
+                        color: "$color",
+                        rarity: "$rarity"
+                        }, totalDropWeight: { $sum: "$dropWeight" } } },
+                    { $match: { totalDropWeight: { $gt: 0 } } }
+                ])
+            )
+            */
+            //return res.status(200).json();
+
             const times = req.body.times ? req.body.times : 1
             if (req.player.bait < times) {
                 return res.status(403).json({ error: 'Not enough bait'});
@@ -49,7 +65,7 @@ module.exports = function(app){
             }
             const totalDropWeight = (await DropWeight.aggregate([
                 { $match: { world: req.body.world } },
-                { $group: { _id: null, amount: { $sum: "$dropWeight" } } }
+                { $group: { _id: null, amount: { $sum: "$dropWeight" } } },
             ]))[0].amount
             req.player.bait -= times;
             req.player.exp += times * 20;
@@ -67,8 +83,21 @@ module.exports = function(app){
                 const randomNumber = Math.floor((Math.random())*(totalDropWeight))
                 //console.log(randomNumber)
                 let cumulativeWeight = 0;
-                for (const instance of await DropWeight.find({})) {
-                    cumulativeWeight += instance.dropWeight;
+                //for (const instance of await DropWeight.find({})) {
+                for (
+                    const _instance of await DropWeight.aggregate([
+                        { $match: { world: req.body.world } },
+                        { $group: { _id: { 
+                            fishType: "$fishType",
+                            color: "$color",
+                            rarity: "$rarity"
+                            }, totalDropWeight: { $sum: "$dropWeight" } } },
+                        { $match: { totalDropWeight: { $gt: 0 } } }
+                    ])
+                ) {
+                    let instance = {"totalDropWeight": _instance.totalDropWeight, ..._instance._id};
+                    //cumulativeWeight += instance.dropWeight;
+                    cumulativeWeight += instance.totalDropWeight;
                     if (randomNumber < cumulativeWeight) {
                         //req.player.bait -= 1;
                         //req.player.save()
@@ -123,6 +152,7 @@ module.exports = function(app){
             return res.status(200).json(newFishes);
             //return res.status(500).json({ error: 'Internal server error' });
         } catch (error) {
+            console.log(error)
             res.status(500).json({ error: 'Fishing: Internal server error' });
         }
     });
